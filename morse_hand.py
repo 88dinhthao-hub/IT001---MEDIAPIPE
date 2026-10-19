@@ -92,7 +92,6 @@ while cap.isOpened():
         seg_results = segmenter.process(rgb_frame)
         mask = seg_results.segmentation_mask
 
-        # Giữ vùng bàn tay luôn sắc nét nếu phát hiện bàn tay
         if results.multi_hand_landmarks:
             hand_mask = np.zeros((h, w), dtype=np.float32)
             for hand_landmarks in results.multi_hand_landmarks:
@@ -105,11 +104,9 @@ while cap.isOpened():
             hand_mask = cv2.dilate(hand_mask, np.ones((31, 31), np.uint8))
             mask = np.maximum(mask, hand_mask)
 
-        # Làm mượt biên mask để chuyển tiếp tự nhiên giữa người và hậu cảnh
         feathered = cv2.GaussianBlur(mask, (15, 15), 0)
         alpha = np.clip((feathered - 0.25) / 0.5, 0.0, 1.0)[:, :, np.newaxis]
 
-        # Làm mờ hậu cảnh và trộn ảnh
         blurred_frame = cv2.GaussianBlur(frame, (55, 55), 0)
         frame = (
             frame.astype(np.float32) * alpha
