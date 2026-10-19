@@ -1,6 +1,6 @@
 # Morse Hand App
 
-Ứng dụng Python giúp nhập văn bản bằng mã Morse thông qua cử chỉ bàn tay trước webcam. Chương trình sử dụng MediaPipe để nhận diện bàn tay và OpenCV để hiển thị hình ảnh, hướng dẫn thao tác và nội dung đã giải mã.
+Ứng dụng Python giúp nhập văn bản bằng mã Morse thông qua cử chỉ bàn tay trước webcam. Chương trình sử dụng MediaPipe để nhận diện bàn tay và tự động làm mờ hậu cảnh (Selfie Segmentation) giúp người dùng và bàn tay luôn rõ nét, kết hợp OpenCV để hiển thị hình ảnh, hướng dẫn thao tác và nội dung đã giải mã.
 
 Ứng dụng hỗ trợ chữ cái **A–Z**, chữ số **0–9** và dấu cách. Đây là ứng dụng tương tác bằng webcam, không có cơ chế tính điểm hay màn chơi.
 
@@ -84,7 +84,7 @@ Chương trình sử dụng camera mặc định có chỉ số `0` và mở c�
 
 ### Giao diện
 
-- **Góc trên bên trái:** hướng dẫn thao tác cho từng ngón tay.
+- **Góc trên bên trái:** hướng dẫn thao tác cho từng ngón tay và trạng thái làm mờ hậu cảnh (`Blur BG`).
 - **MORSE CHART:** bảng tra mã Morse ở góc trên bên phải; ký tự có mã trùng với chuỗi đang nhập được làm sáng.
 - **CURRENT LETTER:** chuỗi dấu chấm và gạch ngang đang nhập cho một ký tự.
 - **MESSAGE:** văn bản đã được giải mã và xác nhận.
@@ -101,6 +101,7 @@ Chương trình sử dụng camera mặc định có chỉ số `0` và mở c�
 | Chạm ngón áp út hai lần, hai lần chạm cách nhau dưới **0,4 giây** | Thêm dấu cách; lần chạm đầu vẫn xác nhận ký tự đang nhập nếu có |
 | Chạm ngón út rồi thả, không giữ quá **1,2 giây** | Xóa dấu Morse cuối cùng; nếu chuỗi Morse trống thì xóa ký tự cuối trong `MESSAGE` |
 | Giữ chạm ngón út hơn **1,2 giây** | Xóa toàn bộ chuỗi Morse và văn bản |
+| Nhấn phím `b` khi cửa sổ ứng dụng đang được chọn | Bật/tắt tính năng tự động làm mờ hậu cảnh (Background Blur) |
 | Nhấn phím `q` khi cửa sổ ứng dụng đang được chọn | Thoát chương trình |
 
 **Lưu ý:** Tách các ngón ra sau mỗi lần chạm trước khi thực hiện lần chạm tiếp theo. Giữ nguyên thao tác chạm ngón trỏ hoặc ngón giữa chỉ thêm một dấu. Khi xác nhận hai ký tự liên tiếp, để hai lần chạm ngón áp út cách nhau ít nhất 0,4 giây để tránh tạo dấu cách ngoài ý muốn.

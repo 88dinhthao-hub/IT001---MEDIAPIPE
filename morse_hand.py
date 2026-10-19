@@ -2,6 +2,8 @@ import cv2
 import mediapipe as mp
 import time
 import math
+import numpy as np
+
 
 MORSE_DICT = {
     ".-": "A",
@@ -50,6 +52,10 @@ hands = mp_hands.Hands(
 )
 mp_draw = mp.solutions.drawing_utils
 
+mp_selfie = mp.solutions.selfie_segmentation
+segmenter = mp_selfie.SelfieSegmentation(model_selection=1)
+blur_background = True
+
 cap = cv2.VideoCapture(0)
 
 cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
@@ -81,6 +87,34 @@ while cap.isOpened():
     h, w, _ = frame.shape
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = hands.process(rgb_frame)
+
+    if blur_background:
+        seg_results = segmenter.process(rgb_frame)
+        mask = seg_results.segmentation_mask
+
+        # Giữ vùng bàn tay luôn sắc nét nếu phát hiện bàn tay
+        if results.multi_hand_landmarks:
+            hand_mask = np.zeros((h, w), dtype=np.float32)
+            for hand_landmarks in results.multi_hand_landmarks:
+                pts = np.array(
+                    [[int(lm.x * w), int(lm.y * h)] for lm in hand_landmarks.landmark],
+                    dtype=np.int32,
+                )
+                hull = cv2.convexHull(pts)
+                cv2.fillConvexPoly(hand_mask, hull, 1.0)
+            hand_mask = cv2.dilate(hand_mask, np.ones((31, 31), np.uint8))
+            mask = np.maximum(mask, hand_mask)
+
+        # Làm mượt biên mask để chuyển tiếp tự nhiên giữa người và hậu cảnh
+        feathered = cv2.GaussianBlur(mask, (15, 15), 0)
+        alpha = np.clip((feathered - 0.25) / 0.5, 0.0, 1.0)[:, :, np.newaxis]
+
+        # Làm mờ hậu cảnh và trộn ảnh
+        blurred_frame = cv2.GaussianBlur(frame, (55, 55), 0)
+        frame = (
+            frame.astype(np.float32) * alpha
+            + blurred_frame.astype(np.float32) * (1.0 - alpha)
+        ).astype(np.uint8)
 
     current_time = time.time()
 
@@ -142,7 +176,7 @@ while cap.isOpened():
 
     overlay = frame.copy()
 
-    fg_x, fg_y, fg_w, fg_h = 20, 20, 240, 160
+    fg_x, fg_y, fg_w, fg_h = 20, 20, 240, 195
     cv2.rectangle(overlay, (fg_x, fg_y), (fg_x + fg_w, fg_y + fg_h), (35, 35, 40), -1)
 
     chart_w, chart_h = 260, 325
@@ -184,6 +218,30 @@ while cap.isOpened():
             1,
         )
         y_offset += 32
+
+    # Hiển thị trạng thái làm mờ nền
+    blur_status = "ON (B)" if blur_background else "OFF (B)"
+    blur_color = (100, 255, 100) if blur_background else (160, 160, 160)
+    cv2.circle(frame, (fg_x + 20, y_offset - 4), 5, blur_color, -1)
+    cv2.putText(
+        frame,
+        "Blur BG",
+        (fg_x + 35, y_offset),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.48,
+        (255, 255, 255),
+        1,
+    )
+    blur_text_size = cv2.getTextSize(blur_status, cv2.FONT_HERSHEY_SIMPLEX, 0.42, 1)[0]
+    cv2.putText(
+        frame,
+        blur_status,
+        (fg_x + fg_w - 15 - blur_text_size[0], y_offset),
+        cv2.FONT_HERSHEY_SIMPLEX,
+        0.42,
+        blur_color,
+        1,
+    )
 
     cv2.putText(
         frame,
@@ -261,8 +319,14 @@ while cap.isOpened():
     )
 
     cv2.imshow("Morse Hand App", frame)
-    if cv2.waitKey(1) & 0xFF == ord("q"):
+    key = cv2.waitKey(1) & 0xFF
+    if key == ord("q"):
         break
+    elif key in (ord("b"), ord("B")):
+        blur_background = not blur_background
 
 cap.release()
+hands.close()
+segmenter.close()
 cv2.destroyAllWindows()
+
