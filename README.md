@@ -4,6 +4,9 @@
 
 Ứng dụng hỗ trợ chữ cái **A–Z**, chữ số **0–9** và dấu cách. Đây là ứng dụng tương tác bằng webcam, không có cơ chế tính điểm hay màn chơi.
 
+> 📺 **Video minh họa:** [Xem video demo trên Canva](https://canva.link/puvect0c6uwe69x)
+
+
 ## 1. Yêu cầu cài đặt
 
 - Sử dụng **Python 3.12** để phù hợp với phiên bản MediaPipe được cố định trong dự án. `pyproject.toml` khai báo Python từ 3.12 trở lên, nhưng khả năng cài đặt trên phiên bản mới hơn còn phụ thuộc thư viện.
@@ -81,6 +84,9 @@ Trên Windows, có thể chạy trực tiếp mà không kích hoạt môi trư�
 Chương trình sử dụng camera mặc định có chỉ số `0` và mở cửa sổ **Morse Hand App**. Nhấp vào cửa sổ rồi nhấn **`q`** để thoát và giải phóng camera.
 
 ## 4. Hướng dẫn sử dụng
+
+> 💡 **Xem video minh họa cách dùng:** [Video demo trên Canva](https://canva.link/puvect0c6uwe69x)
+
 
 ### Giao diện
 
